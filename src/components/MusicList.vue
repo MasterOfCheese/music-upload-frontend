@@ -5,7 +5,6 @@
     <div v-else class="space-y-3 sm:space-y-4">
       <div v-for="music in musicList" :key="music" class="p-2 sm:p-3 bg-white border-b border-gray-200 hover:bg-gray-50 transition-all duration-300">
         <div class="flex items-start">
-          <!-- Nút Play/Pause -->
           <button 
             @click="togglePlay(music)" 
             class="w-10 h-10 flex items-center justify-center bg-[#f50] text-white rounded-full mr-3 hover:bg-[#ff7733] transition"
@@ -18,11 +17,8 @@
             </svg>
           </button>
           <div class="flex-1">
-            <!-- Tên bài nhạc -->
             <span class="text-black font-medium text-base truncate">{{ music }}</span>
-            <!-- Waveform -->
             <div v-if="playingTrack === music" :id="'waveform-' + music.replace(/[^a-zA-Z0-9]/g, '')" class="mt-2"></div>
-            <!-- Thanh tiến trình -->
             <div 
               v-if="playingTrack === music"
               class="relative h-1 w-full bg-gray-200 rounded cursor-pointer mt-2"
@@ -33,7 +29,6 @@
                 :style="{ width: (progressMap[music] || 0) + '%' }"
               ></div>
             </div>
-            <!-- Thời gian -->
             <div v-if="playingTrack === music" class="flex justify-between text-xs text-gray-600 mt-1">
               <span>{{ formatTime(currentTimes[music] || 0) }}</span>
               <span>{{ formatTime(durations[music] || 0) }}</span>
@@ -57,6 +52,7 @@ export default {
       progressMap: reactive({}),
       currentTimes: reactive({}),
       durations: reactive({}),
+      savedTimes: reactive({}), // Lưu thời gian khi dừng
       audio: null,
       waveforms: {},
     }
@@ -71,6 +67,7 @@ export default {
             this.progressMap[music] = 0
             this.currentTimes[music] = 0
             this.durations[music] = 0
+            this.savedTimes[music] = 0
           }
         })
       } catch (error) {
@@ -87,30 +84,49 @@ export default {
     },
     togglePlay(music) {
       if (this.playingTrack === music) {
+        // Dừng bài nhạc
+        this.savedTimes[music] = this.audio.currentTime // Lưu thời gian hiện tại
         this.audio.pause()
         this.waveforms[music]?.pause()
         this.playingTrack = null
       } else {
-        if (this.audio) {
+        // Nếu đang phát bài khác, dừng và reset
+        if (this.audio && this.playingTrack !== music) {
           this.audio.pause()
           this.waveforms[this.playingTrack]?.destroy()
           this.progressMap[this.playingTrack] = 0
           this.currentTimes[this.playingTrack] = 0
+          this.savedTimes[this.playingTrack] = 0
         }
 
-        this.audio = new Audio(this.getMusicUrl(music))
-        this.audio.play()
+        // Nếu là bài cùng bài, khôi phục từ savedTimes
+        if (this.audio && this.playingTrack === music) {
+          this.audio.currentTime = this.savedTimes[music] || 0
+          this.audio.play()
+        } else {
+          // Tạo mới nếu là bài khác
+          this.audio = new Audio(this.getMusicUrl(music))
+          if (this.savedTimes[music]) {
+            this.audio.currentTime = this.savedTimes[music]
+          }
+          this.audio.play()
+        }
+
         this.playingTrack = music
 
         this.audio.addEventListener('loadedmetadata', () => {
           this.durations[music] = this.audio.duration
+          // Khôi phục tiến trình nếu có savedTime
+          if (this.savedTimes[music] && this.audio.currentTime !== this.savedTimes[music]) {
+            this.audio.currentTime = this.savedTimes[music]
+          }
         })
 
         this.audio.addEventListener('timeupdate', () => {
-          this.progressMap[music] = (this.audio.currentTime / this.audio.duration) * 100
-          this.currentTimes[music] = this.audio.currentTime
+          this.progressMap[music] = (this.audio.currentTime / this.audio.duration) * 100 || 0
+          this.currentTimes[music] = this.audio.currentTime || 0
           if (this.waveforms[music]) {
-            this.waveforms[music].seekTo(this.audio.currentTime / this.audio.duration)
+            this.waveforms[music].seekTo(this.audio.currentTime / this.audio.duration || 0)
           }
         })
 
@@ -118,6 +134,7 @@ export default {
           this.playingTrack = null
           this.progressMap[music] = 0
           this.currentTimes[music] = 0
+          this.savedTimes[music] = 0
           this.waveforms[music]?.destroy()
         })
 
@@ -137,7 +154,6 @@ export default {
           })
           this.waveforms[music].load(this.getMusicUrl(music))
 
-          // Thêm sự kiện tua trên waveform
           this.waveforms[music].on('seek', (progress) => {
             if (this.playingTrack === music) {
               const seekTime = progress * this.audio.duration
@@ -174,3 +190,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.flex-1 {
+  flex: 1 1 0%;
+  overflow-x: hidden;
+}
+</style>
