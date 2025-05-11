@@ -21,14 +21,14 @@ export default {
   methods: {
     async fetchMusicList() {
       try {
-        const response = await axios.get('https://your-backend.onrender.com/music')
+        const response = await axios.get('https://music-upload-backend-1.onrender.com/music')
         this.musicList = response.data.files
       } catch (error) {
         console.error('Error fetching music list:', error)
       }
     },
     getMusicUrl(filename) {
-      return `https://your-backend.onrender.com/uploads/${filename}`
+      return `https://music-upload-backend-1.onrender.com/uploads/${filename}`
     }
   },
   mounted() {
