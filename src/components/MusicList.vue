@@ -15,12 +15,11 @@
             <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
           </svg>
         </button>
-        <!-- <img src="https://via.placeholder.com/40" alt="Album Art" class="w-8 h-8 sm:w-10 sm:h-10 rounded mr-2 sm:mr-3"> -->
         <div class="flex-1">
           <span class="text-black font-medium text-sm sm:text-base truncate">{{ music }}</span>
           <div class="flex items-center mt-1">
             <div class="h-4 sm:h-5 w-full sm:w-3/4 bg-gray-200 rounded">
-              <div class="h-full bg-orange-500 rounded" :style="{ width: progress + '%' }"></div>
+              <div class="h-full bg-orange-500 rounded" :style="{ width: (progressMap[music] || 0) + '%' }"></div>
             </div>
           </div>
         </div>
@@ -37,7 +36,7 @@ export default {
     return {
       musicList: [],
       playingTrack: null,
-      progress: 0,
+      progressMap: {}, // Lưu progress riêng cho từng bài nhạc
       audio: null
     }
   },
@@ -46,6 +45,12 @@ export default {
       try {
         const response = await axios.get('https://music-upload-backend.onrender.com/music')
         this.musicList = response.data.files
+        // Khởi tạo progressMap cho các bài nhạc mới
+        this.musicList.forEach(music => {
+          if (!this.progressMap[music]) {
+            this.$set(this.progressMap, music, 0)
+          }
+        })
       } catch (error) {
         console.error('Error fetching music list:', error)
       }
@@ -65,11 +70,11 @@ export default {
         this.audio.play()
         this.playingTrack = music
         this.audio.addEventListener('timeupdate', () => {
-          this.progress = (this.audio.currentTime / this.audio.duration) * 100
+          this.$set(this.progressMap, music, (this.audio.currentTime / this.audio.duration) * 100)
         })
         this.audio.addEventListener('ended', () => {
           this.playingTrack = null
-          this.progress = 0
+          this.$set(this.progressMap, music, 0)
         })
       }
     }
