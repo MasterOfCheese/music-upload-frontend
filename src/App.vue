@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-2xl mx-auto p-6">
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Music Upload App</h1>
+      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">NamP Music App</h1>
       <UploadForm @file-uploaded="refreshMusicList" />
       <MusicList ref="musicList" />
     </div>
