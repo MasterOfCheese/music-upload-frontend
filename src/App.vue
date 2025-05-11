@@ -15,11 +15,11 @@
       </div>
       <div class="flex items-center space-x-2 sm:space-x-3">
         <button class="hidden sm:block px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-semibold hover:bg-orange-600 transition">Upload</button>
-        <button class="text-black hover:text-orange-500">
+        <!-- <button class="text-black hover:text-orange-500">
           <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/>
           </svg>
-        </button>
+        </button> -->
         <button class="md:hidden text-black hover:text-orange-500 focus:outline-none" @click="toggleMenu">
           <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
@@ -75,6 +75,6 @@ export default {
 <style scoped>
 .container {
   max-width: 1200px;
-  margin-top: 80px;
+  margin-top: 60px;
 }
 </style>
