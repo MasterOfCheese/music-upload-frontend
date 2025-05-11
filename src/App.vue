@@ -20,11 +20,11 @@
             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/>
           </svg>
         </button> -->
-        <!-- <button class="md:hidden text-black hover:text-orange-500 focus:outline-none" @click="toggleMenu">
+        <button class="md:hidden text-black hover:text-orange-500 focus:outline-none" @click="toggleMenu">
           <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
           </svg>
-        </button> -->
+        </button>
       </div>
       <!-- Menu mobile -->
       <div v-if="isMenuOpen" class="md:hidden absolute top-14 right-3 bg-white p-3 rounded-lg shadow-lg z-10">
