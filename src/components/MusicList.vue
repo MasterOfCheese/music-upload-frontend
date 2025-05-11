@@ -1,14 +1,29 @@
 <template>
-  <div class="bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-semibold text-gray-200 mb-3 sm:mb-4">Your Music</h2>
-    <div v-if="musicList.length === 0" class="text-gray-400 text-center">No music uploaded yet.</div>
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="music in musicList" :key="music" class="flex items-center justify-between p-3 sm:p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all duration-300">
-        <div class="flex items-center gap-2 sm:gap-4">
-          <img src="https://via.placeholder.com/50" alt="Album Art" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg">
-          <span class="text-gray-200 font-medium text-sm sm:text-base truncate">{{ music }}</span>
+  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+    <h2 class="text-xl sm:text-2xl font-semibold text-black mb-3 sm:mb-4">Your Music</h2>
+    <div v-if="musicList.length === 0" class="text-gray-500 text-center">No music uploaded yet.</div>
+    <div v-else class="space-y-4">
+      <div v-for="music in musicList" :key="music" class="flex items-center p-3 sm:p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-300">
+        <img src="https://via.placeholder.com/50" alt="Album Art" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg mr-4">
+        <div class="flex-1">
+          <span class="text-black font-medium text-sm sm:text-base truncate">{{ music }}</span>
+          <div class="flex items-center mt-1">
+            <button 
+              @click="togglePlay(music)" 
+              class="w-8 h-8 flex items-center justify-center bg-orange-500 text-white rounded-full mr-2 hover:bg-orange-600 transition"
+            >
+              <svg v-if="!playingTrack || playingTrack !== music" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+              </svg>
+            </button>
+            <div class="h-2 bg-gray-300 rounded-full w-full sm:w-1/2">
+              <div class="h-2 bg-orange-500 rounded-full" :style="{ width: progress + '%' }"></div>
+            </div>
+          </div>
         </div>
-        <audio controls :src="getMusicUrl(music)" class="w-1/2 sm:w-2/3"></audio>
       </div>
     </div>
   </div>
@@ -20,7 +35,10 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      musicList: []
+      musicList: [],
+      playingTrack: null,
+      progress: 0,
+      audio: null
     }
   },
   methods: {
@@ -34,10 +52,35 @@ export default {
     },
     getMusicUrl(filename) {
       return `https://music-upload-backend.onrender.com/uploads/${filename}`
+    },
+    togglePlay(music) {
+      if (this.playingTrack === music) {
+        this.audio.pause()
+        this.playingTrack = null
+      } else {
+        if (this.audio) {
+          this.audio.pause()
+        }
+        this.audio = new Audio(this.getMusicUrl(music))
+        this.audio.play()
+        this.playingTrack = music
+        this.audio.addEventListener('timeupdate', () => {
+          this.progress = (this.audio.currentTime / this.audio.duration) * 100
+        })
+        this.audio.addEventListener('ended', () => {
+          this.playingTrack = null
+          this.progress = 0
+        })
+      }
     }
   },
   mounted() {
     this.fetchMusicList()
+  },
+  beforeDestroy() {
+    if (this.audio) {
+      this.audio.pause()
+    }
   }
 }
 </script>
