@@ -15,7 +15,7 @@
             <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
           </svg>
         </button>
-        <img src="https://via.placeholder.com/40" alt="Album Art" class="w-8 h-8 sm:w-10 sm:h-10 rounded mr-2 sm:mr-3">
+        <!-- <img src="https://via.placeholder.com/40" alt="Album Art" class="w-8 h-8 sm:w-10 sm:h-10 rounded mr-2 sm:mr-3"> -->
         <div class="flex-1">
           <span class="text-black font-medium text-sm sm:text-base truncate">{{ music }}</span>
           <div class="flex items-center mt-1">
