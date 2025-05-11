@@ -1,23 +1,23 @@
 <template>
-  <div class="bg-gray-100 rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
-    <h2 class="text-xl sm:text-2xl font-semibold text-black mb-3 sm:mb-4">Upload Your Music</h2>
-    <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+  <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
+    <h2 class="text-lg sm:text-xl font-semibold text-black mb-2 sm:mb-3">Upload Your Music</h2>
+    <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
       <input 
         type="file" 
         accept=".mp3,.wav" 
         @change="handleFileChange" 
-        class="w-full sm:w-auto file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-black hover:file:bg-gray-300 transition-all duration-300"
+        class="w-full sm:w-auto file:mr-3 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-black hover:file:bg-gray-200 transition-all duration-300"
       >
       <button 
         @click="uploadFile" 
         :disabled="!selectedFile || isLoading" 
-        class="w-full sm:w-auto py-2 px-4 sm:px-6 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center"
+        class="w-full sm:w-auto py-2 px-3 sm:px-5 bg-orange-500 text-white rounded-full text-sm font-semibold hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center"
       >
         <span v-if="!isLoading">Upload</span>
-        <span v-else class="flex items-center"><i class="animate-spin mr-2">⏳</i> Uploading...</span>
+        <span v-else class="flex items-center"><i class="animate-spin mr-1">⏳</i> Uploading...</span>
       </button>
     </div>
-    <p v-if="uploadMessage" class="mt-2 sm:mt-4 text-sm" :class="uploadMessage.includes('Error') ? 'text-red-500' : 'text-green-500'">{{ uploadMessage }}</p>
+    <p v-if="uploadMessage" class="mt-2 sm:mt-3 text-xs sm:text-sm" :class="uploadMessage.includes('Error') ? 'text-red-500' : 'text-green-500'">{{ uploadMessage }}</p>
   </div>
 </template>
 
