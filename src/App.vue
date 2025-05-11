@@ -1,10 +1,25 @@
 <template>
-  <div class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-2xl mx-auto p-6">
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">NamP Music App</h1>
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 text-white">
+    <!-- Header -->
+    <header class="bg-gray-800 shadow-lg p-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold tracking-wide">NamP Music</h1>
+      <nav>
+        <a href="#" class="text-gray-300 hover:text-white mx-4">Home</a>
+        <a href="#" class="text-gray-300 hover:text-white mx-4">Playlist</a>
+        <a href="#" class="text-gray-300 hover:text-white mx-4">Profile</a>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
       <UploadForm @file-uploaded="refreshMusicList" />
       <MusicList ref="musicList" />
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 p-4 text-center text-gray-400">
+      <p>&copy; 2025 NamP Music App. All rights reserved.</p>
+    </footer>
   </div>
 </template>
 
@@ -26,16 +41,7 @@ export default {
 </script>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.container {
+  max-width: 1200px;
 }
 </style>

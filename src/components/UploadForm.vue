@@ -1,22 +1,23 @@
 <template>
-  <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-    <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload Music</h2>
+  <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+    <h2 class="text-2xl font-semibold text-gray-200 mb-4">Upload Your Music</h2>
     <div class="flex items-center gap-4">
       <input 
         type="file" 
         accept=".mp3,.wav" 
         @change="handleFileChange" 
-        class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+        class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 transition-all duration-300"
       >
       <button 
         @click="uploadFile" 
-        :disabled="!selectedFile" 
-        class="py-2 px-4 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+        :disabled="!selectedFile || isLoading" 
+        class="py-2 px-6 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-300 flex items-center"
       >
-        Upload
+        <span v-if="!isLoading">Upload</span>
+        <span v-else class="flex items-center"><i class="animate-spin mr-2">⏳</i> Uploading...</span>
       </button>
     </div>
-    <p v-if="uploadMessage" class="mt-4 text-sm" :class="uploadMessage.includes('Error') ? 'text-red-500' : 'text-green-500'">{{ uploadMessage }}</p>
+    <p v-if="uploadMessage" class="mt-4 text-sm" :class="uploadMessage.includes('Error') ? 'text-red-400' : 'text-green-400'">{{ uploadMessage }}</p>
   </div>
 </template>
 
@@ -27,7 +28,8 @@ export default {
   data() {
     return {
       selectedFile: null,
-      uploadMessage: ''
+      uploadMessage: '',
+      isLoading: false
     }
   },
   methods: {
@@ -36,6 +38,7 @@ export default {
     },
     async uploadFile() {
       if (!this.selectedFile) return
+      this.isLoading = true
       const formData = new FormData()
       formData.append('file', this.selectedFile)
 
@@ -47,9 +50,21 @@ export default {
         this.selectedFile = null
         this.$emit('file-uploaded')
       } catch (error) {
-        this.uploadMessage = 'Error uploading file: ' + error.message
+        this.uploadMessage = error.response?.data?.detail || 'Error uploading file: ' + error.message
+      } finally {
+        this.isLoading = false
       }
     }
   }
 }
 </script>
+
+<style scoped>
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>
