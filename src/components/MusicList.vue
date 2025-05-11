@@ -45,7 +45,6 @@
 
 <script>
 import axios from 'axios'
-import WaveSurfer from 'wavesurfer.js'
 
 export default {
   data() {
@@ -128,7 +127,7 @@ export default {
         // Tạo waveform cho bài nhạc đang phát
         this.$nextTick(() => {
           const waveformId = `waveform-${music.replace(/[^a-zA-Z0-9]/g, '')}`
-          this.waveforms[music] = WaveSurfer.create({
+          this.waveforms[music] = window.WaveSurfer.create({
             container: `#${waveformId}`,
             waveColor: '#d1d5db',
             progressColor: '#f97316',
