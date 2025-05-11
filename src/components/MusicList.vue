@@ -45,15 +45,16 @@
 
 <script>
 import axios from 'axios'
+import { reactive } from 'vue'
 
 export default {
   data() {
     return {
       musicList: [],
       playingTrack: null,
-      progressMap: {}, // Lưu tiến trình cho từng bài
-      currentTimes: {}, // Lưu thời gian hiện tại
-      durations: {}, // Lưu tổng thời gian
+      progressMap: reactive({}), // Sử dụng reactive để đảm bảo tính phản hồi
+      currentTimes: reactive({}),
+      durations: reactive({}),
       audio: null,
       waveforms: {}, // Lưu waveform cho từng bài
     }
@@ -64,10 +65,10 @@ export default {
         const response = await axios.get('https://music-upload-backend.onrender.com/music')
         this.musicList = response.data.files
         this.musicList.forEach(music => {
-          if (!this.progressMap[music]) {
-            this.$set(this.progressMap, music, 0)
-            this.$set(this.currentTimes, music, 0)
-            this.$set(this.durations, music, 0)
+          if (!(music in this.progressMap)) {
+            this.progressMap[music] = 0
+            this.currentTimes[music] = 0
+            this.durations[music] = 0
           }
         })
       } catch (error) {
@@ -93,8 +94,8 @@ export default {
         if (this.audio) {
           this.audio.pause()
           this.waveforms[this.playingTrack]?.destroy()
-          this.$set(this.progressMap, this.playingTrack, 0)
-          this.$set(this.currentTimes, this.playingTrack, 0)
+          this.progressMap[this.playingTrack] = 0
+          this.currentTimes[this.playingTrack] = 0
         }
 
         // Phát bài nhạc mới
@@ -104,13 +105,13 @@ export default {
 
         // Tải metadata để lấy duration
         this.audio.addEventListener('loadedmetadata', () => {
-          this.$set(this.durations, music, this.audio.duration)
+          this.durations[music] = this.audio.duration
         })
 
         // Cập nhật tiến trình và thời gian
         this.audio.addEventListener('timeupdate', () => {
-          this.$set(this.progressMap, music, (this.audio.currentTime / this.audio.duration) * 100)
-          this.$set(this.currentTimes, music, this.audio.currentTime)
+          this.progressMap[music] = (this.audio.currentTime / this.audio.duration) * 100
+          this.currentTimes[music] = this.audio.currentTime
           if (this.waveforms[music]) {
             this.waveforms[music].seekTo(this.audio.currentTime / this.audio.duration)
           }
@@ -119,8 +120,8 @@ export default {
         // Reset khi kết thúc
         this.audio.addEventListener('ended', () => {
           this.playingTrack = null
-          this.$set(this.progressMap, music, 0)
-          this.$set(this.currentTimes, music, 0)
+          this.progressMap[music] = 0
+          this.currentTimes[music] = 0
           this.waveforms[music]?.destroy()
         })
 
@@ -147,8 +148,8 @@ export default {
       const width = rect.width
       const seekPercentage = (clickX / width)
       this.audio.currentTime = seekPercentage * this.audio.duration
-      this.$set(this.progressMap, music, seekPercentage * 100)
-      this.$set(this.currentTimes, music, this.audio.currentTime)
+      this.progressMap[music] = seekPercentage * 100
+      this.currentTimes[music] = this.audio.currentTime
       if (this.waveforms[music]) {
         this.waveforms[music].seekTo(seekPercentage)
       }
