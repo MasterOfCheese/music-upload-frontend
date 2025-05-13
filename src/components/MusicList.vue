@@ -5,15 +5,26 @@
     <div v-else class="space-y-3 sm:space-y-4">
       <div v-for="music in musicList" :key="music" class="p-2 sm:p-3 bg-white border-b border-gray-200 hover:bg-gray-50 transition-all duration-300">
         <div class="flex items-start">
+          <!-- Nút Play/Pause -->
           <button 
             @click="togglePlay(music)" 
-            class="w-10 h-10 flex items-center justify-center bg-[#f50] text-white rounded-full mr-3 hover:bg-[#ff7733] transition"
+            class="w-10 h-10 flex items-center justify-center bg-[#f50] text-white rounded-full mr-2 hover:bg-[#ff7733] transition"
           >
             <svg v-if="!playingTrack || playingTrack !== music" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
             <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+            </svg>
+          </button>
+          <!-- Nút Repeat -->
+          <button 
+            @click="toggleRepeat(music)" 
+            :class="repeatTracks[music] ? 'bg-[#f50] hover:bg-[#ff7733]' : 'bg-gray-300 hover:bg-gray-400'" 
+            class="w-10 h-10 flex items-center justify-center rounded-full mr-3 transition-colors duration-300"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
             </svg>
           </button>
           <div class="flex-1">
@@ -29,21 +40,9 @@
                 :style="{ width: (progressMap[music] || 0) + '%' }"
               ></div>
             </div>
-            <div v-if="playingTrack === music" class="flex justify-between items-center text-xs text-gray-600 mt-1">
+            <div v-if="playingTrack === music" class="flex justify-between text-xs text-gray-600 mt-1">
               <span>{{ formatTime(currentTimes[music] || 0) }}</span>
-              <div class="flex items-center">
-                <span>{{ formatTime(durations[music] || 0) }}</span>
-                <!-- Nút Repeat -->
-                <button 
-                  @click="toggleRepeat(music)" 
-                  class="ml-2 p-1 rounded-full hover:bg-gray-200 transition"
-                  :class="repeatTracks[music] ? 'text-[#f50]' : 'text-gray-600'"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16M4 12l4-4m-4 4l4 4m8-8v12m4-4l-4 4m4-4l-4-4"/>
-                  </svg>
-                </button>
-              </div>
+              <span>{{ formatTime(durations[music] || 0) }}</span>
             </div>
           </div>
         </div>
@@ -134,6 +133,7 @@ export default {
 
         this.audio.addEventListener('loadedmetadata', () => {
           this.durations[music] = this.audio.duration
+          // Khôi phục tiến trình nếu có savedTime
           if (this.savedTimes[music] && this.audio.currentTime !== this.savedTimes[music]) {
             this.audio.currentTime = this.savedTimes[music]
           }
