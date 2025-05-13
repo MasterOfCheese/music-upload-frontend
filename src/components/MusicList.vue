@@ -5,15 +5,26 @@
     <div v-else class="space-y-3 sm:space-y-4">
       <div v-for="music in musicList" :key="music" class="p-2 sm:p-3 bg-white border-b border-gray-200 hover:bg-gray-50 transition-all duration-300">
         <div class="flex items-start">
+          <!-- Nút Play/Pause -->
           <button 
             @click="togglePlay(music)" 
-            class="w-10 h-10 flex items-center justify-center bg-[#f50] text-white rounded-full mr-3 hover:bg-[#ff7733] transition"
+            class="w-10 h-10 flex items-center justify-center bg-[#f50] text-white rounded-full mr-2 hover:bg-[#ff7733] transition"
           >
             <svg v-if="!playingTrack || playingTrack !== music" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
             <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+            </svg>
+          </button>
+          <!-- Nút Repeat -->
+          <button 
+            @click="toggleRepeat(music)" 
+            :class="repeatStates[music] ? 'bg-[#f50] hover:bg-[#ff7733]' : 'bg-gray-300 hover:bg-gray-400'" 
+            class="w-10 h-10 flex items-center justify-center rounded-full mr-3 transition-colors duration-300"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
             </svg>
           </button>
           <div class="flex-1">
@@ -52,7 +63,8 @@ export default {
       progressMap: reactive({}),
       currentTimes: reactive({}),
       durations: reactive({}),
-      savedTimes: reactive({}), // Lưu thời gian khi dừng
+      savedTimes: reactive({}),
+      repeatStates: reactive({}), // Trạng thái Repeat cho từng bài
       audio: null,
       waveforms: {},
     }
@@ -68,6 +80,7 @@ export default {
             this.currentTimes[music] = 0
             this.durations[music] = 0
             this.savedTimes[music] = 0
+            this.repeatStates[music] = false // Mặc định Repeat là false
           }
         })
       } catch (error) {
@@ -84,13 +97,11 @@ export default {
     },
     togglePlay(music) {
       if (this.playingTrack === music) {
-        // Dừng bài nhạc
-        this.savedTimes[music] = this.audio.currentTime // Lưu thời gian hiện tại
+        this.savedTimes[music] = this.audio.currentTime
         this.audio.pause()
         this.waveforms[music]?.pause()
         this.playingTrack = null
       } else {
-        // Nếu đang phát bài khác, dừng và reset
         if (this.audio && this.playingTrack !== music) {
           this.audio.pause()
           this.waveforms[this.playingTrack]?.destroy()
@@ -99,12 +110,10 @@ export default {
           this.savedTimes[this.playingTrack] = 0
         }
 
-        // Nếu là bài cùng bài, khôi phục từ savedTimes
         if (this.audio && this.playingTrack === music) {
           this.audio.currentTime = this.savedTimes[music] || 0
           this.audio.play()
         } else {
-          // Tạo mới nếu là bài khác
           this.audio = new Audio(this.getMusicUrl(music))
           if (this.savedTimes[music]) {
             this.audio.currentTime = this.savedTimes[music]
@@ -116,7 +125,6 @@ export default {
 
         this.audio.addEventListener('loadedmetadata', () => {
           this.durations[music] = this.audio.duration
-          // Khôi phục tiến trình nếu có savedTime
           if (this.savedTimes[music] && this.audio.currentTime !== this.savedTimes[music]) {
             this.audio.currentTime = this.savedTimes[music]
           }
@@ -131,11 +139,16 @@ export default {
         })
 
         this.audio.addEventListener('ended', () => {
-          this.playingTrack = null
-          this.progressMap[music] = 0
-          this.currentTimes[music] = 0
-          this.savedTimes[music] = 0
-          this.waveforms[music]?.destroy()
+          if (this.repeatStates[music]) {
+            this.audio.currentTime = 0
+            this.audio.play()
+          } else {
+            this.playingTrack = null
+            this.progressMap[music] = 0
+            this.currentTimes[music] = 0
+            this.savedTimes[music] = 0
+            this.waveforms[music]?.destroy()
+          }
         })
 
         this.$nextTick(() => {
@@ -177,6 +190,9 @@ export default {
       if (this.waveforms[music]) {
         this.waveforms[music].seekTo(seekPercentage)
       }
+    },
+    toggleRepeat(music) {
+      this.repeatStates[music] = !this.repeatStates[music]
     },
   },
   mounted() {
